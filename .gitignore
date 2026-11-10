@@ -1,0 +1,29 @@
+# Dependencies & Build Output
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+
+# Development Environment Secrets
+.env
+.env.local
+.env.*.local
+**/.env
+**/.env.local
+
+# Frontend Linters, Bundlers & Cache
+.oxlintrc.json
+.eslintcache
+.vite/
+.tsbuildinfo
+
+# Tooling & Workspaces
+postman/
+.postman/
+.vscode/
+.idea/
+
+# System Files
+*.log
+.DS_Store
+Thumbs.db
