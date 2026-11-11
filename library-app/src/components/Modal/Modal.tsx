@@ -10,8 +10,8 @@ interface ModalProps {
 export const Modal: React.FC<ModalProps> = ({ toggleModal, content }) => {
     return (
         <div className="modal-bg">
-            <div className="modal">
-                <h5 className="modal-exit" onClick={toggleModal}>X</h5>
+            <div className="modal" role="dialog" aria-modal="true" aria-label="Library dialog">
+                <button className="modal-exit" type="button" aria-label="Close dialog" onClick={toggleModal}>X</button>
                 {content}
             </div>
         </div>

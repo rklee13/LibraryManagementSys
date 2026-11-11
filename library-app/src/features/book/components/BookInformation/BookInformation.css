@@ -7,12 +7,54 @@
 
 .book-info-container {
     width: 100%;
-    display: flex;
-    justify-content: space-evenly;
-    align-items: flex-start;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    align-items: start;
+    gap: clamp(1rem, 2vw, 1.5rem);
 }
 
 .book-info-cover {
-    width: 320px;
-    margin-right: 24px;
+    width: 100%;
+    max-width: 20rem;
+    aspect-ratio: 2 / 3;
+    justify-self: center;
+    object-fit: cover;
+}
+
+.book-info-cover-link {
+    display: block;
+    width: 100%;
+    max-width: 20rem;
+    min-width: 0;
+    justify-self: center;
+    border-radius: 0.5rem;
+}
+
+.book-info-cover-link:hover {
+    transform: translateY(-2px);
+}
+
+.book-info-cover-link:focus-visible {
+    outline: 3px solid var(--brand-accent);
+    outline-offset: 4px;
+}
+
+.book-info-cover-link .book-info-cover {
+    max-width: none;
+}
+
+.book-info-container > div {
+    min-width: 0;
+}
+
+@media (max-width: 560px) {
+    .book-info-container {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .book-info-cover,
+    .book-info-cover-link {
+        width: min(65%, 14rem);
+    }
 }

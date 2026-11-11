@@ -13,11 +13,14 @@ export default function LayoutPage() {
 
     return (
         <div className='layout-page'>
+            <a className="skip-link" href="#main-content">Skip to content</a>
             {state.displayLogin && <LoginRegisterModal />}
             {state.displayLibraryCard && <LibraryCardModal />}
             {state.displayLoan && <LoanBookModal />}
             <Navbar />
-            <Outlet />
+            <main className="layout-main" id="main-content">
+                <Outlet />
+            </main>
             <Footer />
         </div>
     )

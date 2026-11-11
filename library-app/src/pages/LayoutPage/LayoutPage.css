@@ -1,5 +1,30 @@
 .layout-page {
     width: 100%;
-    height: fit-content;
-    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--background-primary);
+}
+
+.layout-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.skip-link {
+    position: fixed;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 20;
+    padding: 0.65rem 1rem;
+    transform: translateY(-160%);
+    color: #FFFFFF;
+    background: var(--brand-primary);
+    border-radius: 0.5rem;
+}
+
+.skip-link:focus {
+    transform: translateY(0);
 }

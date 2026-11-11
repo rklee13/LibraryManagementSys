@@ -1,76 +1,149 @@
 .navbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     width: 100%;
-    height: 100px;
-    background-color: var(--secondary);
-    color: var(--text);
-    display: flex;
+    min-height: 4.5rem;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
     align-items: center;
-    justify-content: space-between;
-    padding-left: 64px;
-    padding-right: 44px;
+    gap: clamp(1rem, 3vw, 2.5rem);
+    padding: 0.75rem clamp(1rem, 4vw, 3.5rem);
+    color: #FFFFFF;
+    background-color: var(--brand-primary);
+    box-shadow: 0 5px 20px rgb(15 23 42 / 12%);
 }
 
 .navbar-logo-section {
-    width: 25%;
-    height: fit-content;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    gap: 0.7rem;
     text-decoration: none;
-    color: var(--text);
+    color: #FFFFFF;
+}
+
+.navbar-logo-section svg {
+    width: 2rem;
+    height: 2rem;
+    color: var(--brand-accent);
+}
+
+.navbar-brand-title {
+    color: inherit;
+    font-size: clamp(1.15rem, 2vw, 1.5rem);
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 .navbar-option-section {
-    width: 75%;
-    height: fit-content;
-    display: flex;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: auto minmax(12rem, min(34vw, 24rem)) auto;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: end;
+    gap: clamp(0.5rem, 1.5vw, 1.25rem);
 }
 
 .navbar-option {
-    height: 100%;
-    width: fit-content;
-    padding: 12px;
-    color: var(--text);
-    border-radius: 12px;
-    cursor: pointer;
-    margin-right: 16px;
-}
-
-.navbar-option:hover {
-    background-color: var(--primary);
-    color: var(--text-secondary);
-}
-
-.navbar-link {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0.65rem 0.85rem;
+    color: #FFFFFF;
+    border: 1px solid transparent;
+    border-radius: 0.65rem;
+    background: transparent;
+    font-size: 0.95rem;
+    font-weight: 600;
     text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.navbar-option:hover,
+.navbar-option:focus-visible {
+    color: #FFFFFF;
+    background-color: rgb(255 255 255 / 10%);
+    transform: translateY(-1px);
 }
 
 .navbar-search-box {
+    min-width: 0;
     display: flex;
-    justify-content: center;
     align-items: center;
-    border: 2px var(--text) solid;
-    border-radius: 22px;
-    padding: 4px;
-    margin-right: 16px;
+    padding: 0.25rem 0.3rem 0.25rem 0.85rem;
+    border: 1px solid rgb(255 255 255 / 28%);
+    border-radius: 0.75rem;
+    background-color: rgb(255 255 255 / 10%);
 }
 
 .navbar-search-input {
-    height: 2.5rem;
+    width: 100%;
+    min-width: 0;
     background-color: transparent;
     border: none;
-    padding-left: 16px;
-    font-size: 1.75rem;
-    font-weight: 400;
+    color: #FFFFFF;
+    font-size: 0.95rem;
 }
 
-::placeholder {
-    color: var(--text);
-    opacity: 1;
+.navbar-search-input::placeholder {
+    color: rgb(255 255 255 / 72%);
 }
 
-.navbar-search-input:focus {
+.navbar-search-input:focus-visible {
     outline: none;
+}
+
+.navbar-search-button {
+    display: inline-grid;
+    flex: 0 0 auto;
+    place-items: center;
+    width: 2.35rem;
+    height: 2.35rem;
+    border: 0;
+    border-radius: 0.55rem;
+    color: #FFFFFF;
+    background: transparent;
+    cursor: pointer;
+}
+
+.navbar-search-button:hover {
+    color: var(--brand-primary);
+    background: #FFFFFF;
+}
+
+.navbar-search-button svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+@media (max-width: 760px) {
+    .navbar {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        padding-block: 0.85rem;
+    }
+
+    .navbar-option-section {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        justify-content: stretch;
+    }
+}
+
+@media (max-width: 480px) {
+    .navbar-option-section {
+        grid-template-columns: auto auto;
+    }
+
+    .navbar-search-box {
+        grid-column: 1 / -1;
+        grid-row: 1;
+    }
+
+    .navbar-option {
+        min-height: 2.5rem;
+        padding-inline: 0.6rem;
+        font-size: 0.88rem;
+    }
 }

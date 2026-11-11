@@ -13,16 +13,23 @@
 }
 
 .register-library-modal-button {
-    width: 50%;
-    height: 3rem;
-    font-size: 1.5rem;
-    border: 2px solid var(--primary);
-    border-radius: 12px;
+    width: fit-content;
+    min-width: min(100%, 12rem);
+    max-width: 100%;
+    min-height: 3rem;
+    padding: 0.7rem 1.25rem;
+    color: var(--text-primary);
+    font-size: 1rem;
+    line-height: 1.3;
+    white-space: nowrap;
+    border: 1px solid var(--primary);
+    border-radius: var(--radius);
     cursor: pointer;
     background-color: var(--background-secondary);
 }
 
 .register-library-modal-button:hover {
-    color: var(--primary);
+    color: var(--brand-primary);
+    background-color: var(--background-primary);
     box-shadow: var(--box-shadow);
 }

@@ -5,18 +5,18 @@ import { Facebook, Instagram, Twitter, YouTube } from '@mui/icons-material';
 
 export const Footer: React.FC = () => {
     return (
-        <div className='footer'>
+        <footer className='footer'>
             <p className='footer-text'>123 Library Street, TW 55555</p>
             <p className='footer-text'>Return Policy</p>
             <p className='footer-text'>Late Fees</p>
             <p className='footer-text'>Library Card Condition</p>
-            <div className='footer-social-cluster'>
+            <div className='footer-social-cluster' role="group" aria-label="Social media">
                 <p className='footer-social-text'>Socials</p>
-                <YouTube className='footer-social' />
-                <Twitter className='footer-social' />
-                <Facebook className='footer-social' />
-                <Instagram className='footer-social' />
+                <YouTube className='footer-social' aria-hidden="true" />
+                <Twitter className='footer-social' aria-hidden="true" />
+                <Facebook className='footer-social' aria-hidden="true" />
+                <Instagram className='footer-social' aria-hidden="true" />
             </div>
-        </div>
+        </footer>
     )
 }

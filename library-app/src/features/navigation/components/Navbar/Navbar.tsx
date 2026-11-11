@@ -15,22 +15,19 @@ export const Navbar: React.FC = () => {
 
     const dispatch: AppDispatch = useDispatch();
 
-    const handleEnterKey = (event: React.KeyboardEvent<HTMLInputElement>) => {
-        if (event.key === 'Enter' && searchRef && searchRef.current && searchRef.current.value.length > 0) {
-            navigate(`/catalog?barcode=${searchRef.current.value}&title=${searchRef.current.value}&description=${searchRef.current.value}`);
-            searchRef.current.value = '';
-        }
-    };
+    const handleSearch = (event: React.ChangeEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const searchInput = searchRef.current;
+        const query = searchInput?.value.trim();
+        if (!query) return;
 
-    const handleSearchIconClick = () => {
-        if (searchRef && searchRef.current && searchRef.current.value.length > 0) {
-            navigate(`/catalog?barcode=${searchRef.current.value}&title=${searchRef.current.value}&description=${searchRef.current.value}`);
-            searchRef.current.value = '';
-        }
-    };
-
-    const navigateToProfile = () => {
-        if (authState.loggedInUser) navigate(`/profile/${authState.loggedInUser._id}`);
+        const searchParams = new URLSearchParams({
+            barcode: query,
+            title: query,
+            description: query
+        });
+        navigate(`/catalog?${searchParams.toString()}`);
+        if (searchInput) searchInput.value = '';
     };
 
     const toggleLogin = () => {
@@ -38,33 +35,36 @@ export const Navbar: React.FC = () => {
     };
 
     return (
-        <nav className="navbar">
+        <nav className="navbar" aria-label="Main navigation">
             <Link to="/" className="navbar-logo-section">
-                <Book sx={{
-                    fontSize: "3rem"
-                }} />
-                <h1>My Library</h1>
+                <Book aria-hidden="true" />
+                <span className="navbar-brand-title">My Library</span>
             </Link>
             <div className="navbar-option-section">
                 <Link to="/catalog" className="navbar-option navbar-link">
-                    <h2>View Catalog</h2>
+                    View catalog
                 </Link>
-                <div className="navbar-search-box">
-                    <input className="navbar-search-input" placeholder="Search Catalog" onKeyDown={handleEnterKey} ref={searchRef} />
-                    <Search onClick={handleSearchIconClick} sx={{
-                        cursor: "pointer",
-                        fontSize: "2rem"
-                    }} />
-                </div>
+                <form className="navbar-search-box" role="search" onSubmit={handleSearch}>
+                    <input
+                        className="navbar-search-input"
+                        type="search"
+                        aria-label="Search the catalog"
+                        placeholder="Search books"
+                        ref={searchRef}
+                    />
+                    <button className="navbar-search-button" type="submit" aria-label="Submit catalog search">
+                        <Search aria-hidden="true" />
+                    </button>
+                </form>
                 {
                     authState.loggedInUser ?
-                        <div className="navbar-option" onClick={navigateToProfile}>
-                            <h2>{authState.loggedInUser.firstName}'s Account</h2>
-                        </div>
+                        <Link className="navbar-option navbar-account" to={`/profile/${authState.loggedInUser._id}`}>
+                            {authState.loggedInUser.firstName}'s account
+                        </Link>
                         :
-                        <div className="navbar-option" onClick={toggleLogin}>
-                            <h2>Login</h2>
-                        </div>
+                        <button className="navbar-option navbar-account" type="button" onClick={toggleLogin}>
+                            Sign in
+                        </button>
                 }
             </div>
         </nav>

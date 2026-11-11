@@ -1,32 +1,30 @@
-/* Google Fonts import for the Inter font family with various weights */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
-/* Reset some default styles for all elements */
 :root {
-  /* Define CSS variables for consistent theming across the application */
-  --background-primary: #EEF0F2;
-  --background-secondary: #F3F3F3;
-  --text: #1C120C;
-  --text-secondary: #7A7978;
-  --primary: #3626A7;
-  --secondary: #0DAB76;
-  --box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  color-scheme: light;
+  --brand-primary: #1E293B;
+  --brand-accent: #D97706;
+  --background-primary: #F8FAFC;
+  --background-secondary: #FFFFFF;
+  --text-primary: #0F172A;
+  --text-secondary: #64748B;
+  --state-success: #16A34A;
+  --state-danger: #DC2626;
+  --border: #E2E8F0;
+  --radius: 12px;
+  --shadow: 0 12px 32px rgb(15 23 42 / 7%);
+  --box-shadow: var(--shadow);
+
+  --primary: var(--brand-primary);
+  --secondary: var(--brand-accent);
+  --accent: var(--brand-accent);
+  --accent-bg: #FFF7ED;
+  --accent-border: #FDBA74;
+  --text: var(--text-primary);
+  --text-h: var(--text-primary);
+  --social-bg: #F1F5F9;
 }
 
-html,
-body,
-#root {
-  width: 100%;
-  height: 100%;
-  font-family: 'Inter', sans-serif;
-  /* Use the imported Inter font */
-  background-color: var(--background-primary);
-  /* Use the defined background color */
-  color: var(--text);
-  /* Use the defined text color */
-}
-
-/* Reset the global css from https://www.joshwcomeau.com/css/custom-css-reset/ */
 *,
 *::before,
 *::after {
@@ -37,9 +35,41 @@ body,
   margin: 0;
 }
 
+html,
+body,
+#root {
+  min-height: 100%;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--background-primary);
+  color: var(--text-primary);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  transition: color 0.2s ease-in-out, background-color 0.2s ease-in-out,
+    border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out,
+    transform 0.2s ease-in-out;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--brand-accent);
+  outline-offset: 3px;
 }
 
 img,
@@ -73,58 +103,83 @@ h6 {
   isolation: isolate;
 }
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
 h1 {
-  font-size: 3rem;
-  font-weight: 900;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 750;
 }
 
 h2 {
-  font-size: 2.5rem;
-  font-weight: 800;
-}
-
-h3 {
-  font-size: 2.25rem;
+  font-size: clamp(1.45rem, 2.5vw, 2rem);
   font-weight: 700;
 }
 
+h3 {
+  font-size: clamp(1.2rem, 2vw, 1.55rem);
+  font-weight: 650;
+}
+
 h4 {
-  font-size: 2rem;
-  font-weight: 600;
+  font-size: 1.15rem;
+  font-weight: 650;
 }
 
 h5 {
-  font-size: 1.75rem;
+  font-size: 1rem;
   font-weight: 600;
 }
 
 h6 {
-  font-size: 1.5rem;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
 p {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 400;
 }
 
 .page {
   width: 100%;
-  height: fit-content;
+  min-width: 0;
+  padding: clamp(1.25rem, 3vw, 2.75rem);
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
 }
 
 .page-container {
-  width: 75%;
-  height: 100%;
-  padding: 16px;
+  width: min(100%, 80rem);
+  min-width: 0;
+  padding: clamp(1.25rem, 3vw, 2rem);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  align-items: flex-start;
-  background-color: var(--background-primary);
-  box-shadow: var(--box-shadow);
+  gap: 1.5rem;
+  background-color: var(--background-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }

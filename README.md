@@ -175,7 +175,7 @@ The system architecture utilizes a strict layer boundary layout to decouple busi
     │   ├── pages/            # Core template layout view injection pages
     │   ├── redux/            # Unified global slice store managers
     │   ├── App.tsx           # Client browser router routing matrix
-    │   └── index.tsx          # System state tree bootstrap context
+    │   └── index.tsx         # System state tree bootstrap context
 ```
 
 ---
@@ -203,3 +203,47 @@ The backend layer enforces request validation on incoming parameters before lett
 | **POST** | `/loan/` | Spins up a historical tracking borrowing receipt | Body mapping validation |
 | **PUT** | `/loan/` | Finalizes a checking return on an open loan item | Updated stamp check |
 | **POST** | `/loan/query` | Searches for loan records based on params | Body mapping validation |
+
+
+
+
+
+
+All users should
+- view the homepage, catalog overview, and search results
+
+All patrons should be able to do what users do AND
+- register a new account and library books
+- login to their account
+- check out & return books
+- view & update their profile
+- view loan record for their account
+
+All employees should do what patrons do AND
+- check books out and in for patrons
+- view book loan history
+- view patron's profile and loan history
+
+
+Server side follows layered architecture (Model-View-Controller):
+1) Setup model
+2) Setup dao to talk to database
+3) Setup service methods to interact with dao
+4) Setup controller functions to call those services
+5) Setup routes to register them with the application
+
+Client side
+- features: store primary components of all features within the application
+
+The multiple import index.ts is just to make our imports nicer across all the different modules
+
+Problems to fix:
+1) Going from register form -> login form: Reset the errors so no error appears
+2) Create a back button from register form -> login form
+3) Hover over "Register" in register form shouldn't resize the modal popup
+4) Code the homepage to get a random book to display for "Book of the week" 
+5) Clean up logic in BookServices.ts - maybe database or better loop
+6) Investigate the search logic for author
+7) BookSlice.ts - checkInBook/checkoutBook fulfilled cased - check rejection case
+8) Create an Admin page working to "Add"/"Remove" librarians and users 
+9) Create a page to add and remove books (librarian only - maybe admins)
