@@ -44,6 +44,8 @@ export const Navbar: React.FC = () => {
                 <Link to="/catalog" className="navbar-option navbar-link">
                     View catalog
                 </Link>
+                {authState.loggedInUser?.type === 'ADMIN' &&
+                    <Link to="/admin" className="navbar-option navbar-link">Admin</Link>}
                 <form className="navbar-search-box" role="search" onSubmit={handleSearch}>
                     <input
                         className="navbar-search-input"

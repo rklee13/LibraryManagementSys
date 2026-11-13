@@ -2,7 +2,13 @@ import bcrypt from 'bcrypt';
 import { config } from '../config';
 import UserDao, { IUserModel } from '../daos/UserDao';
 import { IUser } from '../models/User';
-import { UnableToSaveUserError, InvalidUserAndPasswordError, UserDoesNotExistError } from '../utils/LibraryErrors';
+import {
+    UnableToSaveUserError,
+    InvalidUserAndPasswordError,
+    UserDoesNotExistError,
+    UserAlreadyExistsError,
+    CannotDeleteOwnAccountError
+} from '../utils/LibraryErrors';
 
 // Register a new user in the database. It will encrypt the user's password before saving it to ensure security. 
 // The function takes a user object that adheres to the IUser interface and returns a promise that resolves to the saved user model.
@@ -49,12 +55,19 @@ export async function login(credentials: { email: string, password: string }): P
 
 // Returns all users on the database
 export async function findAllUsers(): Promise<IUserModel[]> {
+    return UserDao.find({}, '-password');
+}
+
+export async function createManagedUser(user: Omit<IUser, 'type'> & { type: 'EMPLOYEE' | 'PATRON' }): Promise<IUserModel> {
     try {
-        // Find all users on the database
-        const users = await UserDao.find();
-        return users;
+        const hashedPassword = await bcrypt.hash(user.password, config.server.rounds);
+        const saved = new UserDao({ ...user, password: hashedPassword });
+        return await saved.save();
     } catch (error) {
-        return [];
+        if (error && typeof error === 'object' && 'code' in error && error.code === 11000) {
+            throw new UserAlreadyExistsError('A user with that email already exists.');
+        }
+        throw new UnableToSaveUserError('Unable to save user.');
     }
 }
 
@@ -62,7 +75,7 @@ export async function findAllUsers(): Promise<IUserModel[]> {
 export async function findUserById(userId: string): Promise<IUserModel> {
     try {
         // Find specific user on the database
-        const user = await UserDao.findById(userId);
+        const user = await UserDao.findById(userId).select('-password');
         if (user) return user;
 
         throw new UserDoesNotExistError("User does not exist with this ID.");
@@ -74,20 +87,22 @@ export async function findUserById(userId: string): Promise<IUserModel> {
 // Saves the modified user info to the database and returns the updated user model
 export async function modifyUser(user: IUserModel): Promise<IUserModel> {
     try {
-        // Using the id, we pass in the modified user object to the database. The new: true will
-        // return the new user object (with fresh/updated data)
-        let id = await UserDao.findByIdAndUpdate(user._id, user, { returnDocument: 'after' });
-
-        if (!id) throw new UserDoesNotExistError("User does not exist with this ID.");
-
-        return user;
+        const existingUser = await UserDao.findById(user._id);
+        if (!existingUser) throw new UserDoesNotExistError("User does not exist with this ID.");
+        existingUser.email = user.email;
+        existingUser.firstName = user.firstName;
+        existingUser.lastName = user.lastName;
+        return await existingUser.save();
     } catch (error: any) {
         throw error;
     }
 }
 
 // Delete the user on the database based on passed user Id
-export async function removeUser(userId: string): Promise<string> {
+export async function removeUser(userId: string, requestingUserId: string): Promise<string> {
+    if (userId === requestingUserId) {
+        throw new CannotDeleteOwnAccountError('Administrators cannot delete their own active account.');
+    }
     try {
         // Using the id, we delete the user on the database
         let deleted = await UserDao.findByIdAndDelete(userId);

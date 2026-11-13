@@ -38,7 +38,7 @@
 .navbar-option-section {
     min-width: 0;
     display: grid;
-    grid-template-columns: auto minmax(12rem, min(34vw, 24rem)) auto;
+    grid-template-columns: repeat(2, auto) minmax(12rem, min(34vw, 24rem)) auto;
     align-items: center;
     justify-content: end;
     gap: clamp(0.5rem, 1.5vw, 1.25rem);
@@ -126,19 +126,21 @@
     }
 
     .navbar-option-section {
-        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-columns: repeat(2, auto) minmax(0, 1fr) auto;
         justify-content: stretch;
     }
 }
 
 @media (max-width: 480px) {
     .navbar-option-section {
-        grid-template-columns: auto auto;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
     }
 
     .navbar-search-box {
-        grid-column: 1 / -1;
-        grid-row: 1;
+        order: -1;
+        flex-basis: 100%;
     }
 
     .navbar-option {

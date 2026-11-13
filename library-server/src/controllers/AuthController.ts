@@ -3,6 +3,7 @@ import { login, register } from '../services/UserService';
 import { IUser } from '../models/User';
 import { IUserModel } from '../daos/UserDao';
 import { InvalidUserAndPasswordError } from '../utils/LibraryErrors';
+import { createAuthToken } from '../utils/AuthToken';
 
 async function handleRegister(req: Request, res: Response): Promise<void> {
     const user: IUser = req.body; // JSON body of the request should match the IUser interface
@@ -50,6 +51,7 @@ async function handleLogin(req: Request, res: Response): Promise<void> {
 
         res.status(200).json({
             message: 'Login successful.',
+            token: createAuthToken(user._id.toString()),
             user: {
                 _id: user._id,
                 type: user.type,

@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import { randomBytes } from 'crypto';
 
 dotenv.config();
 
@@ -11,6 +12,7 @@ const MONGO_URL: string = `mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO
 
 const PORT: number = Number(process.env.SERVER_PORT) || 8000;
 const ROUNDS: number = Number(process.env.SERVER_ROUNDS) || Math.floor(Math.random() * 11); // Randomly generate a number between 0 and 10 if not provided
+const AUTH_SECRET: string = process.env.AUTH_SECRET || randomBytes(32).toString('hex');
 
 export const config = {
     mongo: {
@@ -18,6 +20,7 @@ export const config = {
     },
     server: {
         port: PORT,
-        rounds: ROUNDS
+        rounds: ROUNDS,
+        authSecret: AUTH_SECRET
     }
 };

@@ -19,6 +19,20 @@ export class UserDoesNotExistError extends Error {
     }
 }
 
+export class UserAlreadyExistsError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'UserAlreadyExistsError';
+    }
+}
+
+export class CannotDeleteOwnAccountError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'CannotDeleteOwnAccountError';
+    }
+}
+
 export class BookDoesNotExistError extends Error {
     constructor(message: string) {
         super(message);

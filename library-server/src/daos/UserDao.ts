@@ -7,7 +7,7 @@ export interface IUserModel extends IUser, Document { };
 // This schema will be used to create a MongoDB collection for users, ensuring that the data stored in the database adheres to the structure defined in the IUser interface.
 const UserSchema: Schema = new Schema(
     {
-        type: { type: String, required: true },
+        type: { type: String, enum: ['ADMIN', 'EMPLOYEE', 'PATRON'], required: true },
         email: { type: String, required: true, unique: true },
         firstName: { type: String, required: true },
         lastName: { type: String, required: true },

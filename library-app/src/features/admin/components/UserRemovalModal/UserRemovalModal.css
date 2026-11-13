@@ -1,0 +1,45 @@
+.admin-removal-dialog {
+    width: 100%;
+    display: grid;
+    gap: 1rem;
+    padding: 0.5rem 0 0;
+}
+
+.admin-dialog-eyebrow {
+    color: var(--brand-accent);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.admin-removal-dialog > p:not(.admin-dialog-eyebrow) {
+    color: var(--text-secondary);
+}
+
+.admin-removal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.admin-secondary-button {
+    color: var(--text-primary);
+    border-color: var(--border);
+    background: #FFFFFF;
+}
+
+.admin-danger-button {
+    color: #FFFFFF;
+    background: #B91C1C;
+}
+
+.admin-danger-button:hover:not(:disabled) {
+    background: #991B1B;
+}
+
+.admin-feedback-error {
+    color: #B91C1C;
+    font-weight: 600;
+}

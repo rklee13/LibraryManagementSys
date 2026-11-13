@@ -36,6 +36,7 @@ export const UpdateUserForm: React.FC = () => {
     const logout = (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
         localStorage.removeItem("userId");
+        localStorage.removeItem("authToken");
         dispatch(resetUser("loggedInUser"));
         dispatch(resetUser("profileUser"));
         navigate("/");

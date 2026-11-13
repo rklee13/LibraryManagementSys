@@ -5,3 +5,7 @@ export interface IUser {
     lastName: string;
     password: string;
 }
+
+export type ManagedUserType = Extract<IUser['type'], 'EMPLOYEE' | 'PATRON'>;
+
+export type UserProfile = Omit<IUser, 'password'>;

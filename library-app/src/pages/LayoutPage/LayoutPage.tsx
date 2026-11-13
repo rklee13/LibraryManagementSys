@@ -6,6 +6,7 @@ import type { RootState } from '../../redux/ReduxStore';
 import { LibraryCardModal, LoginRegisterModal } from '../../features/authentication';
 import { Footer, Navbar } from '../../features/navigation';
 import { LoanBookModal } from '../../features/book';
+import { UserRemovalModal } from '../../features/admin';
 
 export default function LayoutPage() {
     // Extracts and read the modal state from the React-Redux store
@@ -17,6 +18,7 @@ export default function LayoutPage() {
             {state.displayLogin && <LoginRegisterModal />}
             {state.displayLibraryCard && <LibraryCardModal />}
             {state.displayLoan && <LoanBookModal />}
+            {state.userToRemove && <UserRemovalModal />}
             <Navbar />
             <main className="layout-main" id="main-content">
                 <Outlet />

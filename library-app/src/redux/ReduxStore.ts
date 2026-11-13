@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit';
 import authenticationReducer from './slices/AuthenticationSlice';
 import modalReducer from './slices/ModalSlice';
 import bookReducer from './slices/BookSlice';
+import adminReducer from './slices/AdminSlice';
 
 // Create the Redux store
 export const store = configureStore({
@@ -9,7 +10,8 @@ export const store = configureStore({
         // Add your reducers here
         authentication: authenticationReducer,
         modal: modalReducer,
-        book: bookReducer
+        book: bookReducer,
+        admin: adminReducer
     }
 });
 

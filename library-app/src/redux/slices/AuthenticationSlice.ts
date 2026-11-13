@@ -9,6 +9,7 @@ interface AuthenticationSliceState {
     loading: boolean;
     error: boolean;
     registerSuccess: boolean;
+    authToken: string | undefined;
 }
 
 const initialState: AuthenticationSliceState = {
@@ -17,17 +18,20 @@ const initialState: AuthenticationSliceState = {
     libraryCard: "",
     loading: false,
     error: false,
-    registerSuccess: false
+    registerSuccess: false,
+    authToken: undefined
 };
 
 // Async thunk for logging in a user
 export const loginUser = createAsyncThunk(
     'auth/login',
-    async (user: LoginUserPayload, thunkAPI) => {
+    async (credentials: LoginUserPayload, thunkAPI) => {
         try {
             // Use the axios library to send an async POST request passing the user object
-            const req = await axios.post('http://localhost:8000/auth/login', user);
-            return req.data.user; // Return the user data from the response
+            const req = await axios.post('http://localhost:8000/auth/login', credentials);
+            const { user, token } = req.data;
+            localStorage.setItem('authToken', token);
+            return { user, token };
         } catch (error: any) {
             return thunkAPI.rejectWithValue(error);
         }
@@ -67,7 +71,9 @@ export const updateUser = createAsyncThunk(
     'auth/update',
     async (payload: User, thunkAPI) => {
         try {
-            const req = await axios.put('http://localhost:8000/users/', payload);
+            const req = await axios.put('http://localhost:8000/users/', payload, {
+                headers: { Authorization: `Bearer ${localStorage.getItem('authToken') || ''}` }
+            });
 
             return req.data.user;
         } catch (error: any) {
@@ -105,7 +111,8 @@ export const AuthenticationSlice = createSlice({
             // Reset login user when user logs out or reset the profile user
             state = {
                 ...state,
-                [action.payload]: undefined
+                [action.payload]: undefined,
+                authToken: action.payload === 'loggedInUser' ? undefined : state.authToken
             }
             return state;
         }
@@ -164,7 +171,8 @@ export const AuthenticationSlice = createSlice({
                 ...state,
                 loading: false,
                 error: false,
-                loggedInUser: action.payload
+                loggedInUser: action.payload.user,
+                authToken: action.payload.token
             };
             return state;
         });

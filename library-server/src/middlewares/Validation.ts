@@ -3,9 +3,7 @@ import Joi, { ObjectSchema } from 'joi';
 import { Request, Response, NextFunction } from 'express';
 import { IUser } from '../models/User';
 import { IUserModel } from '../daos/UserDao';
-import { create } from 'node:domain';
 import { IBook } from '../models/Book';
-import { title } from 'node:process';
 import { IBookModel } from '../daos/BookDao';
 import { ILibraryCard } from '../models/LibraryCard';
 import { ILoanRecord } from '../models/LoanRecord';
@@ -37,6 +35,20 @@ export const Schemas = {
     user: {
         create: Joi.object<IUser>({
             type: Joi.string().valid('ADMIN', 'EMPLOYEE', 'PATRON').required(),
+            email: Joi.string().email().required(),
+            firstName: Joi.string().min(2).max(100).required(),
+            lastName: Joi.string().min(2).max(100).required(),
+            password: Joi.string().min(8).max(100).required()
+        }),
+        register: Joi.object<IUser>({
+            type: Joi.string().valid('PATRON').required(),
+            email: Joi.string().email().required(),
+            firstName: Joi.string().min(2).max(100).required(),
+            lastName: Joi.string().min(2).max(100).required(),
+            password: Joi.string().min(8).max(100).required()
+        }),
+        adminCreate: Joi.object<IUser>({
+            type: Joi.string().valid('EMPLOYEE', 'PATRON').required(),
             email: Joi.string().email().required(),
             firstName: Joi.string().min(2).max(100).required(),
             lastName: Joi.string().min(2).max(100).required(),

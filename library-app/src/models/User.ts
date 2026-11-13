@@ -21,6 +21,14 @@ export interface RegisterUserPayload {
     password: string;
 }
 
+export interface ManagedUserPayload {
+    type: 'EMPLOYEE' | 'PATRON';
+    email: string;
+    firstName: string;
+    lastName: string;
+    password: string;
+}
+
 // Interface for fetching user profile
 export interface FetchUserPayload {
     userId: string,
