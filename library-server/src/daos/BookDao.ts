@@ -7,7 +7,7 @@ export interface IBookModel extends IBook, Document { };
 const BookSchema = new Schema({
     barcode: { type: String, required: true, unique: true },
     cover: { type: String, required: true },
-    title: { type: String, required: true, unique: true },
+    title: { type: String, required: true },
     authors: { type: [String], required: true },
     description: { type: String, required: true },
     subjects: { type: [String], required: true },

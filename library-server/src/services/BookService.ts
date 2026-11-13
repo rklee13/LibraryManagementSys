@@ -1,7 +1,7 @@
 import BookDao, { IBookModel } from "../daos/BookDao";
 import { IBook } from "../models/Book";
 import { IPagination } from "../models/Pagination";
-import { BookDoesNotExistError } from "../utils/LibraryErrors";
+import { BookAlreadyExistsError, BookDoesNotExistError, BookHasActiveLoanError } from "../utils/LibraryErrors";
 
 export async function findAllBooks(): Promise<IBookModel[]> {
     return await BookDao.find();
@@ -18,31 +18,51 @@ export async function findBookById(id: string): Promise<IBookModel> {
     }
 }
 
-export async function modifyBook(book: IBookModel): Promise<IBookModel> {
+export function modifyBook(book: IBookModel): Promise<IBookModel>;
+export function modifyBook(id: string, book: Partial<IBook>): Promise<IBookModel>;
+export async function modifyBook(idOrBook: string | IBookModel, book?: Partial<IBook>): Promise<IBookModel> {
+    const id = typeof idOrBook === 'string' ? idOrBook : idOrBook._id.toString();
+    const updates = typeof idOrBook === 'string' ? book : idOrBook.toObject();
+    let updatedBook: IBookModel | null;
     try {
-        let id = await BookDao.findOneAndUpdate({ barcode: book.barcode }, book, { returnDocument: 'after' });
-        if (id) return book;
-
-        throw new BookDoesNotExistError("The book you are trying to modify does not exist.");
-    } catch (error: any) {
+        updatedBook = await BookDao.findByIdAndUpdate(id, updates, {
+            new: true,
+            runValidators: true
+        });
+    } catch (error) {
+        if (isDuplicateBarcodeError(error)) {
+            throw new BookAlreadyExistsError("A book with this barcode already exists.");
+        }
         throw error;
     }
+    if (updatedBook) return updatedBook;
+    throw new BookDoesNotExistError("The book you are trying to modify does not exist.");
 }
 
 export async function registerBook(book: IBook): Promise<IBookModel> {
     const savedBook = new BookDao(book);
-    return await savedBook.save();
-}
-
-export async function removeBook(barcode: string): Promise<string> {
     try {
-        let id = await BookDao.findOneAndDelete({ barcode });
-        if (id) return "Successfully deleted book.";
-
-        throw new BookDoesNotExistError("The book you are trying to delete does not exist.");
-    } catch (error: any) {
+        return await savedBook.save();
+    } catch (error) {
+        if (isDuplicateBarcodeError(error)) {
+            throw new BookAlreadyExistsError("A book with this barcode already exists.");
+        }
         throw error;
     }
+}
+
+function isDuplicateBarcodeError(error: unknown): boolean {
+    return typeof error === 'object' && error !== null && 'code' in error && error.code === 11000;
+}
+
+export async function removeBook(id: string): Promise<string> {
+    const book = await BookDao.findById(id);
+    if (!book) throw new BookDoesNotExistError("The book you are trying to delete does not exist.");
+    if (book.records.some((record) => record.status === 'LOANED' && !record.returnedDate)) {
+        throw new BookHasActiveLoanError("This book cannot be deleted while it has an active loan.");
+    }
+    await BookDao.findByIdAndDelete(id);
+    return "Successfully deleted book.";
 }
 
 // Fuzzy search based on the given search parameters - they are optional 

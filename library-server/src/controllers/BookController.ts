@@ -3,7 +3,7 @@ import { findAllBooks, registerBook, modifyBook, removeBook, queryBooks } from "
 
 import { IBook } from "../models/Book";
 import { IBookModel } from "../daos/BookDao";
-import { BookDoesNotExistError } from "../utils/LibraryErrors";
+import { BookAlreadyExistsError, BookDoesNotExistError, BookHasActiveLoanError } from "../utils/LibraryErrors";
 
 async function getAllBooks(req: Request, res: Response) {
     try {
@@ -15,23 +15,28 @@ async function getAllBooks(req: Request, res: Response) {
 }
 
 async function createBook(req: Request, res: Response) {
-    let book = req.body;
     try {
-        let savedBook = await registerBook(book);
+        let savedBook = await registerBook(req.body);
         res.status(201).json({ message: "Book registered successfully.", savedBook });
     } catch (error) {
-        res.status(500).json({ message: "Unable to save book at this time.", error });
+        if (error instanceof BookAlreadyExistsError) {
+            res.status(409).json({ message: error.message });
+        } else {
+            res.status(500).json({ message: "Unable to save book at this time.", error });
+        }
     }
 }
 
 async function updateBook(req: Request, res: Response) {
-    let book = req.body;
+    const bookId = req.params.bookId;
     try {
-        let updatedBook = await modifyBook(book);
-        res.status(202).json({ message: "Book updated successfully.", updatedBook });
+        let updatedBook = await modifyBook(typeof bookId === "string" ? bookId : bookId[0], req.body);
+        res.status(200).json({ message: "Book updated successfully.", updatedBook });
     } catch (error) {
         if (error instanceof BookDoesNotExistError) {
             res.status(404).json({ message: "Cannot update book that does not exist.", error });
+        } else if (error instanceof BookAlreadyExistsError) {
+            res.status(409).json({ message: error.message });
         } else {
             res.status(500).json({ message: "Unable to update book at this time.", error });
         }
@@ -39,13 +44,15 @@ async function updateBook(req: Request, res: Response) {
 }
 
 async function deleteBook(req: Request, res: Response) {
-    let { barcode } = req.params;
+    const { bookId } = req.params;
     try {
-        let message = await removeBook(typeof barcode === "string" ? barcode : barcode[0]);
+        let message = await removeBook(typeof bookId === "string" ? bookId : bookId[0]);
         res.status(202).json({ message });
     } catch (error) {
         if (error instanceof BookDoesNotExistError) {
             res.status(404).json({ message: "Cannot delete a book that does not exist.", error });
+        } else if (error instanceof BookHasActiveLoanError) {
+            res.status(409).json({ message: error.message });
         } else {
             res.status(500).json({ message: "Unable to delete book at this time.", error });
         }

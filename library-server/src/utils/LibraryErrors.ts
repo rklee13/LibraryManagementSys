@@ -40,6 +40,20 @@ export class BookDoesNotExistError extends Error {
     }
 }
 
+export class BookAlreadyExistsError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'BookAlreadyExistsError';
+    }
+}
+
+export class BookHasActiveLoanError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'BookHasActiveLoanError';
+    }
+}
+
 export class LibraryCardDoesNotExistError extends Error {
     constructor(message: string) {
         super(message);

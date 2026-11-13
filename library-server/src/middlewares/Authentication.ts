@@ -40,3 +40,11 @@ export function requireAdmin(req: Request, res: Response, next: NextFunction): v
     }
     next();
 }
+
+export function requireLibrarian(req: Request, res: Response, next: NextFunction): void {
+    if (req.authenticatedUser?.type !== 'ADMIN' && req.authenticatedUser?.type !== 'EMPLOYEE') {
+        res.status(403).json({ message: 'Librarian access is required.' });
+        return;
+    }
+    next();
+}

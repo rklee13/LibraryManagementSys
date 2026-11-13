@@ -10,11 +10,21 @@ import CatalogPage from './pages/CatalogPage/CatalogPage';
 import ResourcePage from './pages/ResourcePage/ResourcePage';
 import AdminPage from './pages/AdminPage/AdminPage';
 import type { ReactNode } from 'react';
+import ManageBooksPage from './pages/ManageBooksPage/ManageBooksPage';
 
 function AdminRoute({ children, ready }: { children: ReactNode; ready: boolean }) {
   const loggedInUser = useSelector((state: RootState) => state.authentication.loggedInUser);
   if (!ready) return <p role="status">Checking your session...</p>;
   if (!loggedInUser || loggedInUser.type !== 'ADMIN' || !localStorage.getItem('authToken')) {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+}
+
+function LibrarianRoute({ children, ready }: { children: ReactNode; ready: boolean }) {
+  const loggedInUser = useSelector((state: RootState) => state.authentication.loggedInUser);
+  if (!ready) return <p role="status">Checking your session...</p>;
+  if (!loggedInUser || !['ADMIN', 'EMPLOYEE'].includes(loggedInUser.type) || !localStorage.getItem('authToken')) {
     return <Navigate to="/" replace />;
   }
   return children;
@@ -51,6 +61,7 @@ function App() {
           <Route path='/resource/:barcode' element={<ResourcePage />} />
           <Route path='/profile/:userId' element={<ProfilePage />} />
           <Route path='admin' element={<AdminRoute ready={sessionReady}><AdminPage /></AdminRoute>} />
+          <Route path='manage-books' element={<LibrarianRoute ready={sessionReady}><ManageBooksPage /></LibrarianRoute>} />
         </Route>
       </Routes>
     </BrowserRouter>

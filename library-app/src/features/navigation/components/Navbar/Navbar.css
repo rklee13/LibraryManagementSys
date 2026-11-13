@@ -37,11 +37,11 @@
 
 .navbar-option-section {
     min-width: 0;
-    display: grid;
-    grid-template-columns: repeat(2, auto) minmax(12rem, min(34vw, 24rem)) auto;
+    display: flex;
     align-items: center;
     justify-content: end;
     gap: clamp(0.5rem, 1.5vw, 1.25rem);
+    flex-wrap: nowrap;
 }
 
 .navbar-option {
@@ -70,6 +70,8 @@
 
 .navbar-search-box {
     min-width: 0;
+    flex: 1 1 12rem;
+    max-width: 24rem;
     display: flex;
     align-items: center;
     padding: 0.25rem 0.3rem 0.25rem 0.85rem;
@@ -126,8 +128,8 @@
     }
 
     .navbar-option-section {
-        grid-template-columns: repeat(2, auto) minmax(0, 1fr) auto;
         justify-content: stretch;
+        flex-wrap: wrap;
     }
 }
 

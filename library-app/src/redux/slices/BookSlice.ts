@@ -8,6 +8,9 @@ import type { CheckinBookPayload, CheckoutBookPayload } from "../../models/Book"
 interface BookSliceState {
     loading: boolean;
     error: boolean;
+    managementLoading: boolean;
+    managementError: string | null;
+    deletingBookId: string | null;
     books: Book[];
     currentBook: Book | undefined;
     pagingInformation: PageInfo | null;
@@ -16,14 +19,30 @@ interface BookSliceState {
 const initialState: BookSliceState = {
     loading: true,
     error: false,
+    managementLoading: false,
+    managementError: null,
+    deletingBookId: null,
     books: [],
     currentBook: undefined,
     pagingInformation: null
 }
 
+export type BookWritePayload = Omit<Book, '_id' | 'records' | 'publicationDate'> & { publicationDate: string };
+
+function requestErrorMessage(error: unknown): string {
+    if (axios.isAxiosError(error)) {
+        return error.response?.data?.message || error.message;
+    }
+    return error instanceof Error ? error.message : 'The book request failed.';
+}
+
+function authHeaders() {
+    return { headers: { Authorization: `Bearer ${localStorage.getItem('authToken') || ''}` } };
+}
+
 export const fetchAllBooks = createAsyncThunk(
     'book/all',
-    async (payload, thunkAPI) => {
+    async (_payload, thunkAPI) => {
         try {
             // Retrieves all books from the server running locally 
             let req = await axios.get('http://localhost:8000/book/');
@@ -119,6 +138,42 @@ export const loadBookByBarcode = createAsyncThunk(
     }
 )
 
+export const createBook = createAsyncThunk(
+    'book/create',
+    async (book: BookWritePayload, thunkAPI) => {
+        try {
+            const response = await axios.post('http://localhost:8000/book/', book, authHeaders());
+            return response.data.savedBook as Book;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(requestErrorMessage(error));
+        }
+    }
+);
+
+export const updateBook = createAsyncThunk(
+    'book/update',
+    async ({ bookId, book }: { bookId: string; book: BookWritePayload }, thunkAPI) => {
+        try {
+            const response = await axios.put(`http://localhost:8000/book/${bookId}`, book, authHeaders());
+            return response.data.updatedBook as Book;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(requestErrorMessage(error));
+        }
+    }
+);
+
+export const deleteBook = createAsyncThunk(
+    'book/delete',
+    async (bookId: string, thunkAPI) => {
+        try {
+            await axios.delete(`http://localhost:8000/book/${bookId}`, authHeaders());
+            return bookId;
+        } catch (error) {
+            return thunkAPI.rejectWithValue(requestErrorMessage(error));
+        }
+    }
+);
+
 export const BookSlice = createSlice({
     name: 'book',
     initialState,
@@ -130,6 +185,9 @@ export const BookSlice = createSlice({
             }
 
             return state;
+        },
+        clearBookManagementFeedback(state) {
+            state.managementError = null;
         }
     },
     extraReducers: (builder) => {
@@ -137,7 +195,8 @@ export const BookSlice = createSlice({
             state = {
                 ...state,
                 books: [],
-                loading: true
+                loading: true,
+                error: false
             }
             return state;
         });
@@ -175,14 +234,33 @@ export const BookSlice = createSlice({
             return state;
         });
 
+        builder.addCase(createBook.pending, (state) => {
+            state.managementLoading = true;
+            state.managementError = null;
+        });
+        builder.addCase(updateBook.pending, (state) => {
+            state.managementLoading = true;
+            state.managementError = null;
+        });
+        builder.addCase(deleteBook.pending, (state, action) => {
+            state.deletingBookId = action.meta.arg;
+            state.managementError = null;
+        });
+
         builder.addCase(fetchAllBooks.fulfilled, (state, action) => {
             state = {
                 ...state,
                 books: action.payload,
-                loading: false
+                loading: false,
+                error: false
             }
 
             return state;
+        });
+
+        builder.addCase(fetchAllBooks.rejected, (state) => {
+            state.loading = false;
+            state.error = true;
         });
 
         builder.addCase(queryBooks.fulfilled, (state, action) => {
@@ -265,8 +343,35 @@ export const BookSlice = createSlice({
 
             return state;
         });
+
+        builder.addCase(createBook.fulfilled, (state, action) => {
+            state.managementLoading = false;
+            state.books = [action.payload, ...state.books];
+        });
+        builder.addCase(updateBook.fulfilled, (state, action) => {
+            state.managementLoading = false;
+            state.books = state.books.map((book) => book._id === action.payload._id ? action.payload : book);
+            if (state.currentBook?._id === action.payload._id) state.currentBook = action.payload;
+        });
+        builder.addCase(deleteBook.fulfilled, (state, action) => {
+            state.deletingBookId = null;
+            state.books = state.books.filter((book) => book._id !== action.payload);
+            if (state.currentBook?._id === action.payload) state.currentBook = undefined;
+        });
+        builder.addCase(createBook.rejected, (state, action) => {
+            state.managementLoading = false;
+            state.managementError = action.payload as string || action.error.message || 'Unable to add this book.';
+        });
+        builder.addCase(updateBook.rejected, (state, action) => {
+            state.managementLoading = false;
+            state.managementError = action.payload as string || action.error.message || 'Unable to update this book.';
+        });
+        builder.addCase(deleteBook.rejected, (state, action) => {
+            state.deletingBookId = null;
+            state.managementError = action.payload as string || action.error.message || 'Unable to remove this book.';
+        });
     }
 })
 
-export const { setCurrentBook } = BookSlice.actions;
+export const { setCurrentBook, clearBookManagementFeedback } = BookSlice.actions;
 export default BookSlice.reducer;

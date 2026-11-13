@@ -1,0 +1,115 @@
+.book-form {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.book-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.book-form-grid label {
+    display: grid;
+    gap: 0.4rem;
+    color: var(--brand-primary);
+    font-size: 0.9rem;
+    font-weight: 650;
+}
+
+.book-form-grid input,
+.book-form-grid textarea {
+    width: 100%;
+    min-width: 0;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 0.65rem;
+    color: var(--text-primary);
+    background: #FFFFFF;
+}
+
+.book-form-grid textarea {
+    resize: vertical;
+}
+
+.book-form-hint {
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    font-weight: 400;
+}
+
+.book-form-cover-field,
+.book-form-description {
+    grid-column: 1 / -1;
+}
+
+.book-cover-preview {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+
+.book-cover-preview img {
+    width: 4.5rem;
+    height: 6rem;
+    object-fit: cover;
+    border: 1px solid var(--border);
+    border-radius: 0.4rem;
+    background: #F1F5F9;
+}
+
+.book-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+
+.book-primary-button,
+.book-secondary-button,
+.book-danger-button,
+.book-edit-button {
+    min-height: 2.65rem;
+    padding: 0.6rem 1rem;
+    border: 1px solid transparent;
+    border-radius: 0.65rem;
+    font-weight: 650;
+    cursor: pointer;
+}
+
+.book-primary-button {
+    color: #FFFFFF;
+    background: var(--brand-primary);
+}
+
+.book-primary-button:hover:not(:disabled) {
+    background: #334155;
+}
+
+.book-secondary-button {
+    color: var(--brand-primary);
+    border-color: var(--border);
+    background: #FFFFFF;
+}
+
+.book-secondary-button:hover:not(:disabled) {
+    background: #F8FAFC;
+}
+
+.book-primary-button:disabled,
+.book-secondary-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+    .book-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .book-form-cover-field,
+    .book-form-description {
+        grid-column: auto;
+    }
+}

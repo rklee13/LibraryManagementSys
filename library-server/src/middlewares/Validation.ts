@@ -71,33 +71,35 @@ export const Schemas = {
         })
     },
     book: {
+        bookId: Joi.object<{ bookId: string }>({
+            bookId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required()
+        }),
         create: Joi.object<IBook>({
             barcode: Joi.string().regex(/^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$/).required(),
-            cover: Joi.string().required(),
-            title: Joi.string().required(),
-            authors: Joi.array().required(),
+            cover: Joi.string().uri().required(),
+            title: Joi.string().trim().required(),
+            authors: Joi.array().items(Joi.string().trim().required()).min(1).required(),
             description: Joi.string().required(),
-            subjects: Joi.array().required(),
+            subjects: Joi.array().items(Joi.string().trim().required()).required(),
             publicationDate: Joi.date().required(),
             publisher: Joi.string().required(),
-            pages: Joi.number().required(),
+            pages: Joi.number().integer().min(1).required(),
             genre: Joi.string().required()
         }),
-        update: Joi.object<IBookModel>({
-            _id: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+        update: Joi.object<IBook>({
             barcode: Joi.string().regex(/^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$/).required(),
-            cover: Joi.string().required(),
-            title: Joi.string().required(),
-            authors: Joi.array().required(),
+            cover: Joi.string().uri().required(),
+            title: Joi.string().trim().required(),
+            authors: Joi.array().items(Joi.string().trim().required()).min(1).required(),
             description: Joi.string().required(),
-            subjects: Joi.array().required(),
+            subjects: Joi.array().items(Joi.string().trim().required()).required(),
             publicationDate: Joi.date().required(),
             publisher: Joi.string().required(),
-            pages: Joi.number().required(),
+            pages: Joi.number().integer().min(1).required(),
             genre: Joi.string().required()
         }),
-        delete: Joi.object<{ barcode: string }>({
-            barcode: Joi.string().regex(/^(?=(?:\D*\d){10}(?:(?:\D*\d){3})?$)[\d-]+$/).required()
+        delete: Joi.object<{ bookId: string }>({
+            bookId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required()
         })
     },
     libraryCard: {
