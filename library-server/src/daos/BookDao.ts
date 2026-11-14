@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { IBook } from "../models/Book";
 import { LoanRecordSchema } from "./LoanRecordDao";
+import { normalizeGenre } from "../utils/SearchExpander";
 
 export interface IBookModel extends IBook, Document { };
 
@@ -14,7 +15,7 @@ const BookSchema = new Schema({
     publicationDate: { type: Date, required: true },
     publisher: { type: String, required: true },
     pages: { type: Number, required: true },
-    genre: { type: String, required: true },
+    genre: { type: String, required: true, set: normalizeGenre },
     records: [LoanRecordSchema]
 });
 

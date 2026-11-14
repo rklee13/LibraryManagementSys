@@ -4,6 +4,7 @@ import axios from "axios";
 import type { Book } from "../../models/Book";
 import type { PageInfo } from "../../models/Page";
 import type { CheckinBookPayload, CheckoutBookPayload } from "../../models/Book";
+import type { RootState } from "../ReduxStore";
 
 interface BookSliceState {
     loading: boolean;
@@ -29,6 +30,11 @@ const initialState: BookSliceState = {
 
 export type BookWritePayload = Omit<Book, '_id' | 'records' | 'publicationDate'> & { publicationDate: string };
 
+interface BookMutationThunkConfig {
+    state: RootState;
+    rejectValue: string;
+}
+
 function requestErrorMessage(error: unknown): string {
     if (axios.isAxiosError(error)) {
         return error.response?.data?.message || error.message;
@@ -36,8 +42,12 @@ function requestErrorMessage(error: unknown): string {
     return error instanceof Error ? error.message : 'The book request failed.';
 }
 
-function authHeaders() {
-    return { headers: { Authorization: `Bearer ${localStorage.getItem('authToken') || ''}` } };
+function authHeaders(token: string) {
+    return { Authorization: `Bearer ${token}` };
+}
+
+function getAuthToken(state: RootState): string | null {
+    return state.authentication.authToken || localStorage.getItem('authToken');
 }
 
 export const fetchAllBooks = createAsyncThunk(
@@ -138,11 +148,15 @@ export const loadBookByBarcode = createAsyncThunk(
     }
 )
 
-export const createBook = createAsyncThunk(
+export const createBook = createAsyncThunk<Book, BookWritePayload, BookMutationThunkConfig>(
     'book/create',
     async (book: BookWritePayload, thunkAPI) => {
+        const token = getAuthToken(thunkAPI.getState());
+        if (!token) return thunkAPI.rejectWithValue('Authentication is required. Please sign in again.');
         try {
-            const response = await axios.post('http://localhost:8000/book/', book, authHeaders());
+            const response = await axios.post('http://localhost:8000/book/', book, {
+                headers: authHeaders(token)
+            });
             return response.data.savedBook as Book;
         } catch (error) {
             return thunkAPI.rejectWithValue(requestErrorMessage(error));
@@ -150,11 +164,15 @@ export const createBook = createAsyncThunk(
     }
 );
 
-export const updateBook = createAsyncThunk(
+export const updateBook = createAsyncThunk<Book, { bookId: string; book: BookWritePayload }, BookMutationThunkConfig>(
     'book/update',
     async ({ bookId, book }: { bookId: string; book: BookWritePayload }, thunkAPI) => {
+        const token = getAuthToken(thunkAPI.getState());
+        if (!token) return thunkAPI.rejectWithValue('Authentication is required. Please sign in again.');
         try {
-            const response = await axios.put(`http://localhost:8000/book/${bookId}`, book, authHeaders());
+            const response = await axios.put(`http://localhost:8000/book/${bookId}`, book, {
+                headers: authHeaders(token)
+            });
             return response.data.updatedBook as Book;
         } catch (error) {
             return thunkAPI.rejectWithValue(requestErrorMessage(error));
@@ -162,11 +180,15 @@ export const updateBook = createAsyncThunk(
     }
 );
 
-export const deleteBook = createAsyncThunk(
+export const deleteBook = createAsyncThunk<string, string, BookMutationThunkConfig>(
     'book/delete',
     async (bookId: string, thunkAPI) => {
+        const token = getAuthToken(thunkAPI.getState());
+        if (!token) return thunkAPI.rejectWithValue('Authentication is required. Please sign in again.');
         try {
-            await axios.delete(`http://localhost:8000/book/${bookId}`, authHeaders());
+            await axios.delete(`http://localhost:8000/book/${bookId}`, {
+                headers: authHeaders(token)
+            });
             return bookId;
         } catch (error) {
             return thunkAPI.rejectWithValue(requestErrorMessage(error));

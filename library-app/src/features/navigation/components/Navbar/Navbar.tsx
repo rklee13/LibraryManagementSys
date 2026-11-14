@@ -24,7 +24,8 @@ export const Navbar: React.FC = () => {
         const searchParams = new URLSearchParams({
             barcode: query,
             title: query,
-            description: query
+            description: query,
+            matchMode: 'or'
         });
         navigate(`/catalog?${searchParams.toString()}`);
         if (searchInput) searchInput.value = '';

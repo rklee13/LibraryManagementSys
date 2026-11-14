@@ -16,6 +16,7 @@ export function registerRoutes(app: Express): void {
     app.use("/auth", authRoutes);
     app.use("/users", userRoutes);
     app.use("/book", bookRoutes);
+    app.use("/books", bookRoutes);
     app.use("/card", cardRoutes);
     app.use("/loan", loanRoutes);
 }

@@ -5,6 +5,7 @@ import { authenticateUser, requireLibrarian } from '../middlewares/Authenticatio
 
 const router = express.Router();
 
+router.get('/facets', BookController.getBookFacetsHandler);
 router.get('/', BookController.getAllBooks);
 router.post('/', authenticateUser, requireLibrarian, ValidateSchema(Schemas.book.create, 'body'), BookController.createBook);
 router.put('/:bookId', authenticateUser, requireLibrarian, ValidateSchema(Schemas.book.bookId, 'params'), ValidateSchema(Schemas.book.update, 'body'), BookController.updateBook);

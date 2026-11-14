@@ -1,5 +1,5 @@
 import { Response, Request } from "express";
-import { findAllBooks, registerBook, modifyBook, removeBook, queryBooks } from "../services/BookService";
+import { findAllBooks, registerBook, modifyBook, removeBook, queryBooks, getBookFacets } from "../services/BookService";
 
 import { IBook } from "../models/Book";
 import { IBookModel } from "../daos/BookDao";
@@ -60,7 +60,7 @@ async function deleteBook(req: Request, res: Response) {
 }
 
 async function searchForBooksByQuery(req: Request, res: Response) {
-    let { title, barcode, author, description, subject, genre, page = 1, limit = 25 } = req.query;
+    let { title, barcode, author, description, subject, genre, matchMode = 'and', page = 1, limit = 25 } = req.query;
 
     let books = await queryBooks(
         Number(page),
@@ -70,11 +70,21 @@ async function searchForBooksByQuery(req: Request, res: Response) {
         description as string,
         author as string,
         subject as string,
-        genre as string
+        genre as string,
+        matchMode as string
     );
 
     // No need to check for errors because an empty array is still valid
     res.status(200).json({ message: "Retrieved books from query", page: books });
 }
 
-export default { getAllBooks, createBook, updateBook, deleteBook, searchForBooksByQuery };
+async function getBookFacetsHandler(_req: Request, res: Response) {
+    try {
+        const facets = await getBookFacets();
+        res.status(200).json(facets);
+    } catch (error) {
+        res.status(500).json({ message: "Unable to retrieve book facets at this time.", error });
+    }
+}
+
+export default { getAllBooks, createBook, updateBook, deleteBook, searchForBooksByQuery, getBookFacetsHandler };

@@ -2,6 +2,7 @@ import BookDao, { IBookModel } from "../daos/BookDao";
 import { IBook } from "../models/Book";
 import { IPagination } from "../models/Pagination";
 import { BookAlreadyExistsError, BookDoesNotExistError, BookHasActiveLoanError } from "../utils/LibraryErrors";
+import { buildFlexibleRegex, expandRelatedTerms, normalizeGenre } from "../utils/SearchExpander";
 
 export async function findAllBooks(): Promise<IBookModel[]> {
     return await BookDao.find();
@@ -22,7 +23,8 @@ export function modifyBook(book: IBookModel): Promise<IBookModel>;
 export function modifyBook(id: string, book: Partial<IBook>): Promise<IBookModel>;
 export async function modifyBook(idOrBook: string | IBookModel, book?: Partial<IBook>): Promise<IBookModel> {
     const id = typeof idOrBook === 'string' ? idOrBook : idOrBook._id.toString();
-    const updates = typeof idOrBook === 'string' ? book : idOrBook.toObject();
+    const updates = typeof idOrBook === 'string' ? { ...book } : idOrBook.toObject();
+    if (updates?.genre) updates.genre = normalizeGenre(updates.genre);
     let updatedBook: IBookModel | null;
     try {
         updatedBook = await BookDao.findByIdAndUpdate(id, updates, {
@@ -40,7 +42,7 @@ export async function modifyBook(idOrBook: string | IBookModel, book?: Partial<I
 }
 
 export async function registerBook(book: IBook): Promise<IBookModel> {
-    const savedBook = new BookDao(book);
+    const savedBook = new BookDao({ ...book, genre: normalizeGenre(book.genre) });
     try {
         return await savedBook.save();
     } catch (error) {
@@ -66,56 +68,52 @@ export async function removeBook(id: string): Promise<string> {
 }
 
 // Fuzzy search based on the given search parameters - they are optional 
-export async function queryBooks(page: number, limit: number, title?: string, barcode?: string, description?: string, author?: string, subject?: string, genre?: string): Promise<IPagination<IBookModel>> {
-    let books: IBookModel[] = await BookDao.find(); // Get all books from the database
-    let filteredBooks: IBookModel[] = [];
+export async function queryBooks(page: number, limit: number, title?: string, barcode?: string, description?: string, author?: string, subject?: string, genre?: string, matchMode = 'and'): Promise<IPagination<IBookModel>> {
+    const query = BookDao.find();
+    const andConditions: Parameters<typeof query.and>[0] = [];
+    const searchTerm = (term?: string) => term?.trim();
 
-    books.forEach((book) => {
-        // Go from most specific to least specific search criteria
-        if (barcode) {
-            // If this book's barcode is the same as the search barcode and it isn't already in filteredBooks, then add it
-            if (book.barcode.toLowerCase().includes(barcode.toLowerCase()) && !filteredBooks.some(b => b['barcode'] === book.barcode)) {
-                filteredBooks.push(book);
-            }
-        }
+    const barcodeTerm = searchTerm(barcode);
+    if (barcodeTerm) andConditions.push({ barcode: new RegExp(barcodeTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') });
 
-        if (title) {
-            // Check if this is the book based on title and verify the book wasn't already added based on the barcode
-            if (book.title.toLowerCase().includes(title.toLowerCase()) && !filteredBooks.some(b => b['barcode'] === book.barcode)) {
-                filteredBooks.push(book);
-            }
-        }
+    const titleTerm = searchTerm(title);
+    if (titleTerm) andConditions.push({ title: buildFlexibleRegex(titleTerm) });
 
-        if (description) {
-            // Check if this is the book based on description and verify the book wasn't already added based on the barcode
-            if (book.description.toLowerCase().includes(description.toLowerCase()) && !filteredBooks.some(b => b['barcode'] === book.barcode)) {
-                filteredBooks.push(book);
-            }
-        }
+    const descriptionTerm = searchTerm(description);
+    if (descriptionTerm) andConditions.push({ description: buildFlexibleRegex(descriptionTerm) });
 
-        if (author) {
-            // Check if this is the book has the author and verify the book wasn't already added based on the barcode
-            if (book.authors.some(a => a.toLowerCase().includes(author.toLowerCase())) && !filteredBooks.some(b => b['barcode'] === book.barcode)) {
-                filteredBooks.push(book);
-            }
-        }
+    const authorTerm = searchTerm(author);
+    if (authorTerm) andConditions.push({ authors: buildFlexibleRegex(authorTerm) });
 
-        if (subject) {
-            // Check if this is the book has the subject and verify the book wasn't already added based on the barcode
-            if (book.subjects.some(s => s.toLowerCase().includes(subject.toLowerCase())) && !filteredBooks.some(b => b['barcode'] === book.barcode)) {
-                filteredBooks.push(book);
-            }
-        }
+    const subjectTerm = searchTerm(subject);
+    if (subjectTerm) {
+        const relatedTerms = await expandRelatedTerms(subjectTerm);
+        andConditions.push({
+            $or: relatedTerms.map((term) => ({ subjects: buildFlexibleRegex(term) }))
+        });
+    }
 
-        if (genre) {
-            // Check if this is the book has the genre and verify the book wasn't already added based on the barcode
-            if (book.genre.toLowerCase() === genre.toLowerCase() && !filteredBooks.some(b => b['barcode'] === book.barcode)) {
-                filteredBooks.push(book);
-            }
-        }
-    });
+    const genreTerm = searchTerm(genre);
+    if (genreTerm) andConditions.push({ genre: buildFlexibleRegex(genreTerm, true) });
 
-    return paginateBooks(filteredBooks, page, limit);
+    if (andConditions.length) {
+        if (matchMode === 'or') query.or(andConditions);
+        else query.and(andConditions);
+    }
+    const books: IBookModel[] = await query;
+    return paginateBooks(books, page, limit);
+}
+
+export async function getBookFacets(): Promise<{ genres: string[]; subjects: string[] }> {
+    const [genres, subjects]: [string[], string[]] = await Promise.all([
+        BookDao.distinct('genre'),
+        BookDao.distinct('subjects')
+    ]);
+
+    return {
+        genres: genres.sort((a, b) => a.localeCompare(b)),
+        subjects: subjects.sort((a, b) => a.localeCompare(b))
+    };
 }
 
 export function paginateBooks(books: IBookModel[], page: number, limit: number): IPagination<IBookModel> {
