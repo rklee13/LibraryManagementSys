@@ -71,6 +71,11 @@ export const Schemas = {
         })
     },
     book: {
+        aiRecommend: Joi.object<{ prompt?: string; userId?: string; limit?: number }>({
+            prompt: Joi.string().trim().min(1).max(1000),
+            userId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+            limit: Joi.number().integer().min(1).max(20)
+        }).or('prompt', 'userId'),
         bookId: Joi.object<{ bookId: string }>({
             bookId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).required()
         }),

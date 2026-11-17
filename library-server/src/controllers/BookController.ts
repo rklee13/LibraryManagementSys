@@ -4,6 +4,7 @@ import { findAllBooks, registerBook, modifyBook, removeBook, queryBooks, getBook
 import { IBook } from "../models/Book";
 import { IBookModel } from "../daos/BookDao";
 import { BookAlreadyExistsError, BookDoesNotExistError, BookHasActiveLoanError } from "../utils/LibraryErrors";
+import { recommendBooks } from "../services/AiRecommendationService";
 
 async function getAllBooks(req: Request, res: Response) {
     try {
@@ -87,4 +88,21 @@ async function getBookFacetsHandler(_req: Request, res: Response) {
     }
 }
 
-export default { getAllBooks, createBook, updateBook, deleteBook, searchForBooksByQuery, getBookFacetsHandler };
+async function recommendBooksHandler(req: Request, res: Response) {
+    const { prompt, userId, limit } = req.body as { prompt?: string; userId?: string; limit?: number };
+    if (userId && req.authenticatedUser?._id.toString() !== userId) {
+        res.status(403).json({ message: "You can only request recommendations from your own borrowing history." });
+        return;
+    }
+
+    try {
+        const recommendations = await recommendBooks({ prompt, userId, limit });
+        res.status(200).json({ recommendations });
+    } catch (error) {
+        res.status(502).json({
+            message: error instanceof Error ? error.message : "Unable to generate recommendations at this time."
+        });
+    }
+}
+
+export default { getAllBooks, createBook, updateBook, deleteBook, searchForBooksByQuery, getBookFacetsHandler, recommendBooksHandler };

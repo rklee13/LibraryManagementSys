@@ -3,6 +3,7 @@ import authenticationReducer from './slices/AuthenticationSlice';
 import modalReducer from './slices/ModalSlice';
 import bookReducer from './slices/BookSlice';
 import adminReducer from './slices/AdminSlice';
+import aiRecommendationReducer from './slices/AiRecommendationSlice';
 
 // Create the Redux store
 export const store = configureStore({
@@ -11,7 +12,8 @@ export const store = configureStore({
         authentication: authenticationReducer,
         modal: modalReducer,
         book: bookReducer,
-        admin: adminReducer
+        admin: adminReducer,
+        aiRecommendations: aiRecommendationReducer
     }
 });
 
